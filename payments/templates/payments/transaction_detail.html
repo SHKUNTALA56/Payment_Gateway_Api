@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Detail</title>
+</head>
+<body>
+    <h1>Transaction Details</h1>
+    <div>
+        <h2>{{ transaction.name }}</h2>
+        <p>Amount: {{ transaction.amount }}</p>
+        <p>Date: {{ transaction.date }}</p>
+        <!-- Add more fields as needed -->
+    </div>
+    <a href="{% url 'transaction-list' %}">Back to Transaction List</a>
+</body>
+</html>
