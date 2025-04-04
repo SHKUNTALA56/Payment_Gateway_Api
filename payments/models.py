@@ -1,12 +1,18 @@
 from django.db import models
 
 AUTH_USER_MODEL = 'payments.User'
-
+    
 class User(models.Model):
+    ROLE_CHOICES = [
+        ('admin', 'Admin'),
+        ('customer', 'Customer'),
+        ('business_owner', 'Business Owner'),
+    ]
     username = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
     phone_number = models.CharField(max_length=15)
-    password = models.CharField(max_length=128)  # for JWT authentication
+    password = models.CharField(max_length=128)
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='customer')
 
     def __str__(self):
         return self.username
