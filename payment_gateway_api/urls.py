@@ -16,8 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.shortcuts import redirect
+
+
+def home(request):
+    return redirect('/api/')  # Redirects to the API page
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('payments.urls')),
+    path('', home),  # Redirects the root URL to /api/
 ]
