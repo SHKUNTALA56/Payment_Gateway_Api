@@ -1,29 +1,36 @@
-"""
-URL configuration for payment_gateway_api project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path, include
-from django.shortcuts import redirect
+from django.http import JsonResponse
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from payments import views  # Correct import
+from payments.views import HomePageView 
 
-
-def home(request):
-    return redirect('/api/')  # Redirects to the API page
-
+# Redirect root URL to HomePageView
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('payments.urls')),
-    path('', home),  # Redirects the root URL to /api/
+    path('api/', include('payments.urls')),  # Include app's urls.py
+
+
+     # Registration & Login page   
+    path('api/auth/register/', views.register_user, name='register-api'),  # Add this line
+
+
+
+    # Root path for the home page
+    path('', HomePageView.as_view(), name='home'),
+
+    # JWT Auth
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
+    # Your views for users, businesses, etc.
+    path('users/', views.UserListView.as_view(), name='user-list'),
+    path('businesses/', views.BusinessListView.as_view(), name='business-list'),
+    path('transactions/', views.TransactionListView.as_view(), name='transaction-list'),
+    path('notifications/', views.NotificationListView.as_view(), name='notification-list'),
+
+    # Role-based views
+    path('admin-only/', views.AdminOnlyView.as_view(), name='admin-only'),
+    path('business-owner-only/', views.BusinessOwnerView.as_view(), name='business-owner-only'),
+    path('customer-only/', views.CustomerOnlyView.as_view(), name='customer-only'),
 ]

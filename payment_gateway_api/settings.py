@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'payments',
     'django_extensions',
     'rest_framework',
+    'rest_framework.authtoken',
 ]
 
 MIDDLEWARE = [
@@ -71,6 +72,7 @@ TEMPLATES = [
         },
     },
 ]
+
 
 WSGI_APPLICATION = 'payment_gateway_api.wsgi.application'
 
