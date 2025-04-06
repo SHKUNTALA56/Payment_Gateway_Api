@@ -6,6 +6,9 @@ class IsAdminUser(permissions.BasePermission):
     Custom permission to only allow admins to access a view.
     """
     def has_permission(self, request, view):
+        # Check if user is authenticated and has the 'admin' role
+        if not request.user.is_authenticated:
+            return False
         return request.user.role == 'admin'
 
 class IsBusinessOwner(permissions.BasePermission):

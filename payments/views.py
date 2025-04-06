@@ -27,6 +27,8 @@ from django.shortcuts import render, redirect
 from .forms import CustomUserCreationForm
 from django.http import HttpResponse
 from django.views import View
+from drf_yasg.utils import swagger_auto_schema
+
 
 
 
@@ -34,6 +36,7 @@ from django.views import View
 #Create User
 class UserCreateView(APIView):
     permission_classes = [IsAuthenticated]  # Adjust if needed
+    
 
     def post(self, request):
         serializer = UserCreateSerializer(data=request.data)
@@ -57,6 +60,8 @@ def register_view(request):
 # User ViewSet with JWT authentication and IsAuthenticated permission
 
 class RegisterAPIView(APIView):
+
+    @swagger_auto_schema(request_body=UserRegistrationSerializer)
     def post(self, request, *args, **kwargs):
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid():
@@ -64,32 +69,24 @@ class RegisterAPIView(APIView):
             return Response({"message": "User registered successfully"}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-@api_view(['POST'])
-def register_user(request):
-    if request.method == 'POST':
-        serializer = UserRegistrationSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()  # Save the user to the database
-            return Response({'message': 'User registered successfully'}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)    
 
 # User ViewSet with JWT authentication and IsAuthenticated permission
 
 class AdminOnlyView(APIView):
-    permission_classes = [IsAdminUser]  # Only admins can access
+    permission_classes = [IsAdminUser]  # Only admin users
 
     def get(self, request, *args, **kwargs):
-        return Response({"message": "This is an admin-only view!"})
+        return Response({"message": "Public access for now"})
     
 class BusinessOwnerView(APIView):
-    permission_classes = [IsAuthenticated]  # Only authenticated users can access
+    permission_classes = [IsBusinessOwner]  # Business owner-only access
 
     def get(self, request, *args, **kwargs):
         # Logic for business owners
         return Response({"message": "This is a business owner-only view!"})
 
 class CustomerOnlyView(APIView):
-    permission_classes = [IsAuthenticated]  # Ensure only authenticated users can access
+    permission_classes = [IsCustomer]  # Customer-only access
 
     def get(self, request, *args, **kwargs):
         # Logic for customer-specific data
@@ -99,28 +96,37 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # Only authenticated users can view
 
 # Business ViewSet with JWT authentication and IsAuthenticated permission
+class SomeView(APIView):
+    permission_classes = [IsBusinessOwner]  # Only business owners can view
+
+class SomeProtectedView(APIView):
+    permission_classes = [IsBusinessOwner]  # Only business owners can view
+
+    def get(self, request):
+        return Response({"message": "Success!"})
+    
 class BusinessViewSet(viewsets.ModelViewSet):
     queryset = Business.objects.all()
     serializer_class = BusinessSerializer
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsBusinessOwner]  # Only business owners can view
 
 # Transaction ViewSet with JWT authentication and IsAuthenticated permission
 class TransactionViewSet(viewsets.ModelViewSet):
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # Only authenticated users can access
 
 # Notification ViewSet with JWT authentication and IsAuthenticated permission
 class NotificationViewSet(viewsets.ModelViewSet):
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # Only authenticated users
 
 # --- Webhook Handler ---
 @csrf_exempt
@@ -140,7 +146,7 @@ class HomePageView(TemplateView):
 
 # List and Detail views for Users (Admin only)
 class UserListView(APIView):
-    permission_classes = [IsAuthenticated, IsAdminUser]  # Admin-only access
+    permission_classes = [IsAdminUser]  # Admin-only access
 
     def get(self, request):
         # Your logic here
@@ -154,7 +160,7 @@ class UserDetailView(DetailView):
 class BusinessListView(ListAPIView):
     queryset = Business.objects.all()
     serializer_class = BusinessSerializer
-    permission_classes = [IsAuthenticated, IsAdminUser | IsBusinessOwner]  # Admin or Business Owner access
+    permission_classes = [IsAdminUser,IsBusinessOwner]  # Admin or Business Owner access
 
 class BusinessDetailView(DetailView):
     model = Business
@@ -184,7 +190,7 @@ class TransactionDetailView(DetailView):
 
 # Customer views (Admin or Customer access)
 class IsCustomerListView(ListView):
-    permission_required = 'payments.view_iscustomer' 
+    permission_required = 'payments.view_IsCustomer' 
     model = IsCustomer
     template_name = 'is_customer_list.html'
     context_object_name = 'customers'
@@ -205,3 +211,13 @@ def webhook_handler(request):
         except json.JSONDecodeError:
             return JsonResponse({'status': 'failed', 'message': 'Invalid JSON payload'}, status=400)
     return JsonResponse({'status': 'failed', 'message': 'Invalid request method'}, status=400)
+
+@swagger_auto_schema(
+    method='get',
+    operation_description="Get something",
+    security=[{'Bearer': []}]
+)
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def my_view(request):
+    return Response({"msg": "You are authenticated"})

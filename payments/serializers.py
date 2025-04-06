@@ -4,6 +4,7 @@ from .models import User, Business, Transaction, Notification
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
     class Meta:
         model = User
         fields = ['username', 'email', 'password']  # Add necessary fields
@@ -17,13 +18,15 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 class UserCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id','username', 'password', 'email','phone_number' 'first_name', 'last_name']
+        fields = ['id','username', 'password', 'email','phone_number']
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'phone_number', 'password','first_name','last_name']
-        extra_kwargs = {'password': {'write_only': True}}
+        fields = ['id','username', 'password', 'email','phone_number', 'role']
+        extra_kwargs = {'password': {'write_only': True},
+                        'phone_number': {'required': True}
+                        }
 
 
 class BusinessSerializer(serializers.ModelSerializer):

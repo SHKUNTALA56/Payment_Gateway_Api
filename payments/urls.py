@@ -31,6 +31,7 @@ urlpatterns = [
     path('', include(router.urls)),  # This will handle API routes like /users/, /businesses/, etc.
     path('users/', views.UserListView.as_view(), name='user-list'),
     path('users/<int:pk>/', views.UserDetailView.as_view(), name='user-detail'),
+    
 
     
     #Customer-related ednpoints
@@ -65,6 +66,7 @@ urlpatterns = [
 
     path('login/', LoginView.as_view(template_name='login.html'), name='login'),
     path('api/auth/register/', RegisterAPIView.as_view(), name='register-api'),
+    path('accounts/login/', LoginView.as_view(), name='login'),
 
 
 ]
