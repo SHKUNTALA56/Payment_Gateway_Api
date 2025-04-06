@@ -1,1 +1,1 @@
-web: python -m waitress.server PaymentGatewayApi.wsgi:application
+python -m waitress.server PaymentGatewayApi.wsgi:application --port=$PORT
